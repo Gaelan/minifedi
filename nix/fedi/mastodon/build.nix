@@ -2,25 +2,28 @@
 , nixosTests, yarn, callPackage, imagemagick, ffmpeg, file, ruby_3_0
 , writeShellScript, fetchYarnDeps, fixup_yarn_lock, brotli
 
-# Allow building a fork or custom version of Mastodon:
-, pname ? "mastodon", version ? import ./version.nix, srcOverride ? null
-, dependenciesDir ? ./. # Should contain gemset.nix, yarn.nix and package.json.
-}:
+, pname ? "mastodon", versionDef }:
 
 stdenv.mkDerivation rec {
-  inherit pname version;
+  inherit pname;
+
+  version = import "${versionDef}/version.nix";
 
   # Using overrideAttrs on src does not build the gems and modules with the overridden src.
   # Putting the callPackage up in the arguments list also does not work.
-  src =
-    if srcOverride != null then srcOverride else callPackage ./source.nix { };
+  src = callPackage "${versionDef}/source.nix" { };
 
   mastodonGems = bundlerEnv {
     name = "${pname}-gems-${version}";
     inherit version;
     ruby = ruby_3_0;
     gemdir = src;
-    gemset = dependenciesDir + "/gemset.nix";
+    # hack: bundix doesn't properly handle deps in non-default groups, so we get
+    # rpam (which depends on linux-pam) even though pam_authentication isn't
+    # enabled. just patch it out
+    gemset = lib.attrsets.filterAttrs
+      (k: v: k != "rpam2" && k != "devise_pam_authenticatable2")
+      (import (versionDef + "/gemset.nix"));
     # This fix (copied from https://github.com/NixOS/nixpkgs/pull/76765) replaces the gem
     # symlinks with directories, resolving this error when running rake:
     #   /nix/store/451rhxkggw53h7253izpbq55nrhs7iv0-mastodon-gems-3.0.1/lib/ruby/gems/2.6.0/gems/bundler-1.17.3/lib/bundler/settings.rb:6:in `<module:Bundler>': uninitialized constant Bundler::Settings (NameError)
@@ -41,7 +44,7 @@ stdenv.mkDerivation rec {
 
     yarnOfflineCache = fetchYarnDeps {
       yarnLock = "${src}/yarn.lock";
-      sha256 = "sha256-e3rl/WuKXaUdeDEYvo1sSubuIwtBjkbguCYdAijwXOA=";
+      sha256 = import "${versionDef}/yarn-hash.nix";
     };
 
     nativeBuildInputs = [

@@ -1,6 +1,6 @@
-{ pkgs, name }:
+{ pkgs, name, versionDef }:
 let
-  mastodon = pkgs.callPackage ./build.nix { };
+  mastodon = pkgs.callPackage ./build.nix { inherit versionDef; };
   env = {
     LOCAL_DOMAIN = "${name}.lvh.me";
     WEB_DOMAIN = "${name}.lvh.me";
@@ -107,15 +107,17 @@ in {
         touch $data/setup-done
 
         tootctl accounts create a --email=a@${name}.example --confirmed --role Owner
-        rails runner "Account.find_local('a').user.update!(password: 'Aa12345!')"
         tootctl accounts create b --email=b@${name}.example --confirmed
-        rails runner "Account.find_local('b').user.update!(password: 'Bb12345!')"
         tootctl accounts create c --email=c@${name}.example --confirmed
-        rails runner "Account.find_local('c').user.update!(password: 'Cc12345!')"
         tootctl accounts create d --email=d@${name}.example --confirmed
-        rails runner "Account.find_local('d').user.update!(password: 'Dd12345!')"
         tootctl accounts create e --email=e@${name}.example --confirmed
-        rails runner "Account.find_local('e').user.update!(password: 'Ee12345!')"
+        rails runner "
+          Account.find_local('a').user.update!(password: 'Aa12345!')
+          Account.find_local('b').user.update!(password: 'Bb12345!')
+          Account.find_local('c').user.update!(password: 'Cc12345!')
+          Account.find_local('d').user.update!(password: 'Dd12345!')
+          Account.find_local('e').user.update!(password: 'Ee12345!')
+        "
       fi
 
       exec ${s6.start}

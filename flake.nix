@@ -71,10 +71,19 @@
             fi
 
             mkdir -p cert
+            export MINIFEDI_CERT=$(pwd)/cert
 
             CAROOT=$MINIFEDI_CERT ${pkgs.mkcert}/bin/mkcert -install
           '';
         in "${script}";
+      };
+    apps.x86_64-darwin.mastodon-mk-version =
+      let pkgs = nixpkgs.legacyPackages.x86_64-darwin;
+      in {
+        type = "app";
+        program = "${
+            import ./nix/fedi/mastodon/mk-version { inherit pkgs; }
+          }/bin/mastodon-mk-version";
       };
   };
 }

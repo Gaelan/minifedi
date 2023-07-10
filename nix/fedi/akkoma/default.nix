@@ -132,6 +132,9 @@ in {
       cat ${config} | envsubst > $data/config.exs
       export AKKOMA_CONFIG_PATH=$data/config.exs
 
+      # elixir takes 2 sigints to exit if it has something on stdin
+      exec </dev/null
+
       if ! [ -e $data/setup-done ]; then
         createuser -h$postgres ${name}
         createdb -h$postgres ${name} -O${name}
@@ -152,8 +155,6 @@ in {
         touch $data/setup-done
       fi
 
-      # elixir takes 2 sigints to exit if it has something on stdin
-      exec </dev/null
       exec pleroma start
     '';
   }];
