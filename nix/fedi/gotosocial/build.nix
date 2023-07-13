@@ -32,6 +32,7 @@ in buildGoModule rec {
     mv web $out/share/gotosocial/
   '';
 
-  # tests are working only on x86_64-linux
-  doCheck = stdenv.isLinux && stdenv.isx86_64;
+  # minifedi: tests push us over 4GB build space; not reasonable to expect more
+  # than that
+  doCheck = false;
 }

@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+if ! type "nix" > /dev/null; then
+  echo "Minifedi requires Nix. Please install it from your package manager, or following the instructions at https://nixos.org/download.html."
+  exit 1
+fi
+
+if [ "x$1" = x ]; then
+  echo "subcommand required: start, install-cert, mastodon-mk-version"
+  exit 1
+fi
+
+nix --extra-experimental-features "flakes nix-command" run .#$1
