@@ -1,4 +1,4 @@
-{ pkgs, name, }:
+{ pkgs, name, host, users, ... }:
 let
   env = {
     MIX_ENV = "prod";
@@ -18,7 +18,7 @@ let
     import Config
 
     config :pleroma, Pleroma.Web.Endpoint,
-      url: [host: "${name}.lvh.me", scheme: "https", port: 443],
+      url: [host: "${host}", scheme: "https", port: 443],
       http: [ip: {:local, "$MINIFEDI_RUN/${name}/akkoma.sock"}, port: 0],
       secret_key_base: "$SECRET_KEY_BASE",
       live_view: [signing_salt: "$LIVE_VIEW_SIGNING_SALT"],
@@ -26,7 +26,7 @@ let
 
     config :pleroma, :instance,
       name: "${name}",
-      email: "a@${name}.example",
+      email: "admin@${name}.example",
       notify_email: "noreply@${name}.example",
       limit: 5000,
       registrations_open: true
@@ -146,11 +146,12 @@ in {
         pleroma_ctl migrate
 
         export PLEROMA_CTL_RPC_DISABLED=true
-        pleroma_ctl user new a a@${name}.example --assume-yes --password Aa12345! --admin
-        pleroma_ctl user new b b@${name}.example --assume-yes --password Bb12345!
-        pleroma_ctl user new c c@${name}.example --assume-yes --password Cc12345!
-        pleroma_ctl user new d d@${name}.example --assume-yes --password Dd12345!
-        pleroma_ctl user new e e@${name}.example --assume-yes --password Ee12345!
+        ${
+          pkgs.lib.strings.concatStrings (builtins.map (u:
+            "pleroma_ctl user new ${u.name} ${u.email} --assume-yes --password ${u.password} ${
+              if u.admin then "--admin" else ""
+            };") users)
+        }
         
         touch $data/setup-done
       fi
@@ -167,7 +168,7 @@ in {
     ssl_session_cache shared:ssl_session_cache:10m;
 
     server {
-      server_name ${name}.lvh.me;
+      server_name ${host};
 
       listen 443 ssl http2;
       listen [::]:443 ssl http2;

@@ -1,16 +1,16 @@
-{ pkgs, name, versionDef }:
+{ pkgs, name, host, users, versionDef, ... }:
 let
   mastodon = pkgs.callPackage ./build.nix { inherit versionDef; };
   env = {
-    LOCAL_DOMAIN = "${name}.lvh.me";
-    WEB_DOMAIN = "${name}.lvh.me";
+    LOCAL_DOMAIN = host;
+    WEB_DOMAIN = host;
     ALLOWED_PRIVATE_ADDRESSES = "127.0.0.1";
     RAILS_ENV = "production";
     NODE_ENV = "production";
     DB_USER = name;
     DB_NAME = name;
     REDIS_NAMESPACE = "${name}_";
-    EMAIL_DOMAIN_ALLOWLIST = "${name}.example";
+    EMAIL_DOMAIN_ALLOWLIST = "example.com";
     SMTP_DELIVERY_METHOD = "file";
   };
   s6 = import ../../s6.nix {
@@ -71,10 +71,8 @@ in {
 
       cd ${mastodon}
 
-      ${pkgs.lib.strings.concatStrings (pkgs.lib.attrsets.mapAttrsToList
-        (k: v: ''
-          export ${k}=${v}
-        '') env)}
+      ${pkgs.lib.strings.concatStrings
+      (pkgs.lib.attrsets.mapAttrsToList (k: v: "export ${k}=${v};") env)}
 
       if ! [ -e $data/setup-done ]; then
         rake secret > $data/secret_key_base
@@ -106,18 +104,17 @@ in {
 
         touch $data/setup-done
 
-        tootctl accounts create a --email=a@${name}.example --confirmed --role Owner
-        tootctl accounts create b --email=b@${name}.example --confirmed
-        tootctl accounts create c --email=c@${name}.example --confirmed
-        tootctl accounts create d --email=d@${name}.example --confirmed
-        tootctl accounts create e --email=e@${name}.example --confirmed
-        rails runner "
-          Account.find_local('a').user.update!(password: 'Aa12345!')
-          Account.find_local('b').user.update!(password: 'Bb12345!')
-          Account.find_local('c').user.update!(password: 'Cc12345!')
-          Account.find_local('d').user.update!(password: 'Dd12345!')
-          Account.find_local('e').user.update!(password: 'Ee12345!')
-        "
+        ${
+          pkgs.lib.strings.concatStrings (builtins.map (u:
+            "tootctl accounts create ${u.name} --email=${u.email} --confirmed ${
+              if u.admin then "--role Owner" else ""
+            };") users)
+        }
+        rails runner "${
+          pkgs.lib.strings.concatStrings (builtins.map (u:
+            "Account.find_local('${u.name}').user.update!(password: '${u.password}');")
+            users)
+        }"
       fi
 
       exec ${s6.start}
@@ -140,7 +137,7 @@ in {
     server {
       listen 443 ssl http2;
       listen [::]:443 ssl http2;
-      server_name ${name}.lvh.me;
+      server_name ${host};
 
       ssl_protocols TLSv1.2 TLSv1.3;
       ssl_ciphers HIGH:!MEDIUM:!LOW:!aNULL:!NULL:!SHA;

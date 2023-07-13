@@ -1,0 +1,5 @@
+- fix flake.nix to handle arbitrary arches
+- rip out or fix GtS (need to handle certs somehow)
+- figure out how to support local clones, and document this
+- data generation?
+- separate out config into separate file, and document this
