@@ -67,4 +67,14 @@ Forks of the above should work fine as well, as long as they haven't changed any
 rm -r data/
 ```
 
-### Use a different version (including a fork) of
+### Use a different version (including a fork) of Mastodon?
+
+```sh
+./minifedi mk-mastodon NAME REPO COMMIT-OR-TAG
+# eg
+./minifedi mk-mastodon mastodon-4.1.4 https://github.com/Mastodon/Mastodon.git v4.1.4
+```
+
+This'll create a directory in `versions/mastodon`, which you can then refer to from your `config.nix`.
+
+Custom versions for Akkoma and GoToSocial aren't supported yet.
