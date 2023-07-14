@@ -1,5 +1,6 @@
 {
   inputs.flake-utils.url = "github:numtide/flake-utils";
+
   outputs = { self, flake-utils, nixpkgs }:
     flake-utils.lib.eachDefaultSystem (system:
       let pkgs = nixpkgs.legacyPackages.${system};
@@ -8,7 +9,10 @@
           s6 = (import ./nix/s6.nix {
             inherit pkgs;
             services = pkgs.lib.attrsets.mapAttrs (_: v: v.service)
-              (import ./nix/services.nix { inherit pkgs; });
+              (import ./nix/services.nix {
+                inherit pkgs;
+                configFn = import ./config.nix;
+              });
             path = "service";
           });
         in {
@@ -26,12 +30,15 @@
               mkdir -p cert
               rm -rf data/run
               mkdir data/run
-              ${if pkgs.stdenv.isLinux then "export LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive" else ""}
+              ${if pkgs.stdenv.isLinux then
+                "export LOCALE_ARCHIVE=${pkgs.glibcLocales}/lib/locale/locale-archive"
+              else
+                ""}
               export MINIFEDI_CERT=$(pwd)/cert
               export MINIFEDI_DATA=$(pwd)/data
               export MINIFEDI_RUN=$(pwd)/data/run
               ${if pkgs.stdenv.isLinux then ''
-                echo "=> You'll probably get prompted for a sudo password now. This is just so we can bind to port 80/443; we literally acquire cap_net_bind_service then switch back to being $USER."
+                echo "=> You'll probably get prompted for a sudo password now. This is just so we can bind to port 80/443; we will acquire cap_net_bind_service then switch back to being $USER."
                 exec $(PATH=$oldpath which sudo) -E ${pkgs.libcap}/bin/capsh --keep=1 --user="$USER" --inh='cap_net_bind_service' --addamb='cap_net_bind_service' -- -c ${s6.start}
               '' else ''
                 exec ${s6.start}
@@ -55,11 +62,11 @@
             '';
           in "${script}";
         };
-        apps.x86_64-darwin.mastodon-mk-version = {
+        apps.mk-mastodon = {
           type = "app";
           program = "${
               import ./nix/fedi/mastodon/mk-version { inherit pkgs; }
-            }/bin/mastodon-mk-version";
+            }/bin/mk-mastodon";
         };
       });
 }

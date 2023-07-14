@@ -38,9 +38,8 @@ let
   in if portFromHash <= 1024 then portFromHash + 1024 else portFromHash;
 
   config = pkgs.writeText "config.yaml" (pkgs.lib.generators.toYAML { } {
-    host = "${name}.lvh.me";
     bind-address = "127.0.0.1";
-    inherit port;
+    inherit host port;
     db-type = "postgres";
     db-user = name;
     db-database = name;

@@ -1,27 +1,14 @@
-{ pkgs }:
+{ pkgs, configFn }:
 let
-  instances = [
-    {
-      name = "mastodon";
-      type = ./fedi/mastodon;
-      versionDef = ../versions/mastodon/mastodon-4.1.4;
-    }
-    {
-      name = "glitch";
-      type = ./fedi/mastodon;
-      versionDef = ../versions/mastodon/glitch-a40529f;
-    }
-    {
-      name = "akkoma";
-      type = ./fedi/akkoma;
-    }
-    {
-      name = "gotosocial";
-      type = ./fedi/gotosocial;
-    }
-  ];
+  instances = (configFn {
+    types = {
+      mastodon = import ./fedi/mastodon;
+      akkoma = import ./fedi/akkoma;
+      gotosocial = import ./fedi/gotosocial;
+    };
+  }).instances;
   evaldInstances = builtins.listToAttrs (builtins.map (inst:
-    pkgs.lib.attrsets.nameValuePair inst.name (import inst.type ({
+    pkgs.lib.attrsets.nameValuePair inst.name (inst.type ({
       inherit pkgs;
       host = "${inst.name}.lvh.me";
       users = [

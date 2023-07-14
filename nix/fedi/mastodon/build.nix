@@ -2,20 +2,17 @@
 , nixosTests, yarn, callPackage, imagemagick, ffmpeg, file, ruby_3_0
 , writeShellScript, fetchYarnDeps, fixup_yarn_lock, brotli
 
-, pname ? "mastodon", versionDef }:
+, versionDef }:
 
 stdenv.mkDerivation rec {
-  inherit pname;
-
-  version = import "${versionDef}/version.nix";
+  name = import "${versionDef}/name.nix";
 
   # Using overrideAttrs on src does not build the gems and modules with the overridden src.
   # Putting the callPackage up in the arguments list also does not work.
   src = callPackage "${versionDef}/source.nix" { };
 
   mastodonGems = bundlerEnv {
-    name = "${pname}-gems-${version}";
-    inherit version;
+    name = "gems-${name}";
     ruby = ruby_3_0;
     gemdir = src;
     # hack: bundix doesn't properly handle deps in non-default groups, so we get
@@ -39,8 +36,8 @@ stdenv.mkDerivation rec {
   };
 
   mastodonModules = stdenv.mkDerivation {
-    pname = "${pname}-modules";
-    inherit src version;
+    name = "modules-${name}";
+    inherit src;
 
     yarnOfflineCache = fetchYarnDeps {
       yarnLock = "${src}/yarn.lock";

@@ -10,11 +10,11 @@ let
     jq
     prefetch-yarn-deps
   ]);
-in pkgs.runCommand "mastodon-mk-version" {
+in pkgs.runCommand "mk-mastodon" {
   nativeBuildInputs = [ pkgs.makeWrapper ];
 } ''
   mkdir -p $out/bin
-  cp ${./mk-version.sh} $out/bin/mastodon-mk-version
-  patchShebangs $out/bin/mastodon-mk-version
-  wrapProgram $out/bin/mastodon-mk-version --prefix PATH : ${binPath}
+  cp ${./mk-version.sh} $out/bin/mk-mastodon
+  patchShebangs $out/bin/mk-mastodon
+  wrapProgram $out/bin/mk-mastodon --prefix PATH : ${binPath}
 ''

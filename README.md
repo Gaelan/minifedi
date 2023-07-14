@@ -1,28 +1,70 @@
-# MINIFEDI IS NOT DONE. It's like 80% of the way there, but the docs below remain slightly aspirational for the moment.
-
 # Minifedi
 
 Minifedi is a tool to quickly spin up a bunch of ActivityPub servers for local testing.
 
-Minifedi should run on any macOS or Linux system with [Nix](https://nixos.org) installed. (Nix itself works fine on any Linux distribution; you don't need to be using NixOS.) Windows isn't natively supported, but WSL should work. Minifedi is entirely self-contained and needs no changes to your system configuration besides installing Nix; you can install it with a git clone, delete it with `rm -rf`, and your system will be exactly the way it was before.
+Minifedi is entirely self-contained and needs no changes to your system configuration besides installing Nix; you can install it with a git clone, delete it with `rm -rf`, and your system will be exactly the way it was before.
 
-Minifedi's goal is to "just work" on every machine. If the instructions below fail for you, please file an issue; I'll fix it if at all possible.
+## System Requirements
+
+- macOS or Linux (any distribution). Tested on x86_64, aarch64 should work. Other architectues probably won't due to poor Nix support, unfortunately.
+  - Windows isn't natively supported, but might work under WSL.
+- A recent version of [Nix](https://nixos.org).
+  - This doesn't mean you need to be on NixOS; Nix can be installed on more or less any distribution, and is happy to do its own thing without interfering with your system.
+- ~4GB free on disk.
+- ~4GB free in /tmp.
+  - On many Linux distributions, this means you'll need ~8GB of RAM.
+  - You might be able to get away with less if you disable GoToSocial.
+- Ports 80 and 443 free.
+  - This is required because some (all) fedi software is only willing to federate with servers on the standard ports.
+  - macOS lets any user listen on these ports. On Linux, Minifedi will use sudo to gain the capability required to listen on these ports, then immediately switch back to your user and relinquish all other capabilties.
+
+## Warnings
+
+Minifedi is very new software. I'm fairly sure it won't break your system (it's designed very specifically to not do anything that possibly could) but it might not work either.
+
+Minifedi is designed for testing only. The assumption is you'll happily throw out everything stored in it when you're done. Don't store anything you care about in an instance run by Minifedi.
 
 ## Getting Started
 
-```
-git clone https://github.com/Gaelan/minifedi.git
-cd minifedi
-vi nix/services.nix # if you'd like, edit the list of instances - by default, we run one of each
-nix run
-```
+Minifedi's goal is to "just work" on every machine. If the instructions below fail for you, please file an issue; I'll fix it if at all possible.
 
-Give it some time, and you should see
+1. Install [Nix](https://nixos.org), if you haven't.
+   - If you install Nix through your OS package manager, you may need to add yourself to the `nix-users` group and/or ensure the `nix-daemon` service is enabled.
+2. ```
+   git clone https://github.com/Gaelan/minifedi.git
+   cd minifedi
+   ```
+3. If you'd like, edit `config.nix` to customize which instances you get. By default, you get one each of Mastodon, Glitch, Akkoma, and GoToSocial, but you're welcome to disable some or run multiple copies of the same type.
+4. `./minifedi start`
+5. Wait for stuff to build then start up; this should take 20-30 minutes.
+6. Your instances should be running and accessible at INSTANCENAME.lvh.me (e.g. https://mastodon.lvh.me).
+
+Each instance is created by default with five users:
+
+- username `a`, email `a@example.com`, password `MiniFediA1!`, admin
+- username `b`, email `b@example.com`, password `MiniFediB1!`
+- username `c`, email `c@example.com`, password `MiniFediC1!`
+- username `d`, email `d@example.com`, password `MiniFediD1!`
+- username `e`, email `e@example.com`, password `MiniFediE1!`
+
+Enjoy your testing!
 
 ## Supported Software
 
-Minifedi currently supports:
+Minifedi currently supports the following:
 
-- Mastodon (and forks)
+- Mastodon
 - Akkoma
 - GoToSocial
+
+Forks of the above should work fine as well, as long as they haven't changed anything about the build, installation, or configuration process.
+
+## How do I…
+
+### Reset Minifedi, restoring every instance to its default state?
+
+```sh
+rm -r data/
+```
+
+### Use a different version (including a fork) of

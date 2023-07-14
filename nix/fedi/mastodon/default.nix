@@ -1,6 +1,6 @@
-{ pkgs, name, host, users, versionDef, ... }:
+{ pkgs, name, host, users, version, ... }:
 let
-  mastodon = pkgs.callPackage ./build.nix { inherit versionDef; };
+  mastodon = pkgs.callPackage ./build.nix { versionDef = version; };
   env = {
     LOCAL_DOMAIN = host;
     WEB_DOMAIN = host;

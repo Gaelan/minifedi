@@ -5,9 +5,12 @@ if ! type "nix" > /dev/null; then
   exit 1
 fi
 
-if [ "x$1" = x ]; then
-  echo "subcommand required: start, install-cert, mastodon-mk-version"
+subcommand=$1
+shift
+
+if [ -z "$subcommand" ]; then
+  echo "subcommand required: start, install-cert, mk-mastodon"
   exit 1
 fi
 
-nix --extra-experimental-features "flakes nix-command" run .#$1
+nix --extra-experimental-features "flakes nix-command" run .#$subcommand -- $@

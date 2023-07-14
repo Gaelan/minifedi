@@ -34,7 +34,6 @@ let
     config :pleroma, :media_proxy,
       enabled: false,
       redirect_on_failure: true
-      #base_url: "https://cache.pleroma.social"
 
     config :pleroma, Pleroma.Repo,
       adapter: Ecto.Adapters.Postgres,
@@ -65,12 +64,21 @@ let
         "ref" => "stable"
       }
 
-    config :pleroma, :http, adapter: [pools: %{default: [conn_opts: [transport_opts: [cacertfile: "$MINIFEDI_CERT/rootCA.pem"]]]}]
+    config :pleroma, :http,
+      adapter: [
+        pools: %{
+          default: [
+            conn_opts: [
+              transport_opts: [
+                verify: :verify_none
+                # cacertfile: "$MINIFEDI_CERT/rootCA.pem"
+                # ^ won't work if Erlang finds the system cert store
+              ]
+            ]
+          ]
+        }
+      ]
   '';
-  # admin: %{
-  #   "name" => "admin",
-  #   "ref" => "stable"
-  # }
 
   path = pkgs.lib.strings.concatStrings (builtins.map (x: "${x}/bin:") [
     pkgs.akkoma

@@ -1,5 +1,4 @@
-- fix flake.nix to handle arbitrary arches
-- figure out how to support local clones, and document this
-- data generation?
+- figure out how to support local source, and document this
 - separate out config into separate file, and document this
-- license
+- support custom source for akkoma and gts
+- data generation?
