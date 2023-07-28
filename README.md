@@ -38,6 +38,7 @@ Minifedi's goal is to "just work" on every machine. If the instructions below fa
 4. `./minifedi start`
 5. Wait for stuff to build then start up; this should take 20-30 minutes.
 6. Your instances should be running and accessible at INSTANCENAME.lvh.me (e.g. https://mastodon.lvh.me).
+   - You'll have to click through an HTTPS warning; if you'd like, you can run `./minifedi install-cert` to add Minifedi's root to your system certificate store, avoiding this. (We don't do this by default, as our policy is not to touch your system configuration.)
 
 Each instance is created by default with five users:
 
@@ -78,3 +79,7 @@ rm -r data/
 This'll create a directory in `versions/mastodon`, which you can then refer to from your `config.nix`.
 
 Custom versions for Akkoma and GoToSocial aren't supported yet.
+
+### Use Minifedi to test some fedi software I'm hacking on locally?
+
+There isn't a good solution for this yet, but the plan is that you'll run your software locally however you usually do, with Minifedi's nginx running in front to serve it from a domain accessible to the other instances.
