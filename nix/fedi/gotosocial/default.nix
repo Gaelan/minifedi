@@ -77,6 +77,7 @@ in {
 
       export GTS_DB_ADDRESS=$postgres
       export GTS_STORAGE_LOCAL_BASE_PATH=$data/storage
+      export SSL_CERT_FILE=$MINIFEDI_CERT/rootCA.pem
       export NIX_SSL_CERT_FILE=$MINIFEDI_CERT/rootCA.pem
 
       if ! [ -e $data/setup-done ]; then

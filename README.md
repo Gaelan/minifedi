@@ -37,8 +37,11 @@ Minifedi's goal is to "just work" on every machine. If the instructions below fa
 3. If you'd like, edit `config.nix` to customize which instances you get. By default, you get one each of Mastodon, Glitch, Akkoma, and GoToSocial, but you're welcome to disable some or run multiple copies of the same type.
 4. `./minifedi start`
 5. Wait for stuff to build then start up; this should take 20-30 minutes.
-6. Your instances should be running and accessible at INSTANCENAME.lvh.me (e.g. https://mastodon.lvh.me).
-   - You'll have to click through an HTTPS warning; if you'd like, you can run `./minifedi install-cert` to add Minifedi's root to your system certificate store, avoiding this. (We don't do this by default, as our policy is not to touch your system configuration.)
+6. **Semi-optional:** Run `./minifedi install-cert` in another terminal to add Minifedi's root to your system certificate store.
+   - This is a change to your system configuration, albeit a small one; as such, we'd like to make it optional. Currently, there are a few caveats if you don't:
+     - You'll see HTTPS errors in the browser. These can usually be clicked through; if they can't (possible after deleting `data` with software that enforces HSTS, like Mastodon), clear your browser's data for lvh.me and try again.
+     - GoToSocial won't be able to federate on macOS. (It will on Linux, I think, but I haven't tested this.)
+7. Your instances should be running and accessible at INSTANCENAME.lvh.me (e.g. https://mastodon.lvh.me).
 
 Each instance is created by default with five users:
 
