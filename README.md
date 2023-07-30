@@ -63,6 +63,10 @@ Minifedi currently supports the following:
 
 Forks of the above should work fine as well, as long as they haven't changed anything about the build, installation, or configuration process.
 
+## Mitmproxy Integration
+
+Minifedi has built-in integration with [mitmproxy](https://mitmproxy.org), allowing you to see a lot of every HTTP request an instance sends to another instance. To use this, set `mitmproxy = true;` in your `config.nix`, start minifedi, then go to `http://localhost:8081`. The mitmproxy integration currently requires ports 8080 and 8081 to be open.
+
 ## How do I…
 
 ### Reset Minifedi, restoring every instance to its default state?

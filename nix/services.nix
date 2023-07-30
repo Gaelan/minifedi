@@ -1,15 +1,10 @@
-{ pkgs, configFn }:
+{ pkgs, config }:
 let
-  instances = (configFn {
-    types = {
-      mastodon = import ./fedi/mastodon;
-      akkoma = import ./fedi/akkoma;
-      gotosocial = import ./fedi/gotosocial;
-    };
-  }).instances;
+  instances = config.instances;
+  util = import ./util.nix { inherit pkgs; };
   evaldInstances = builtins.listToAttrs (builtins.map (inst:
     pkgs.lib.attrsets.nameValuePair inst.name (inst.type ({
-      inherit pkgs;
+      inherit pkgs util;
       host = "${inst.name}.lvh.me";
       users = [
         {
@@ -43,6 +38,7 @@ let
           admin = false;
         }
       ];
+      proxy = if config.mitmproxy then "http://localhost:8080" else null;
     } // inst))) instances);
 in evaldInstances // {
   postgres = import ./support-services/postgres { inherit pkgs; };
@@ -51,4 +47,6 @@ in evaldInstances // {
     inherit pkgs;
     instances = evaldInstances;
   };
+} // pkgs.lib.attrsets.optionalAttrs config.mitmproxy {
+  mitmproxy = import ./support-services/mitmproxy { inherit pkgs; };
 }

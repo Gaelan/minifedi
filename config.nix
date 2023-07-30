@@ -21,4 +21,8 @@
       type = types.gotosocial;
     }
   ];
+
+  # Enable logging of all requests between instances. Requires ports 8080 and
+  # 8081 open.
+  mitmproxy = false;
 }

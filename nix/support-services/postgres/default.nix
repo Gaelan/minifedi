@@ -3,6 +3,8 @@
 {
   service = pkgs.linkFarm "postgres" {
     run = pkgs.writeShellScript "run-postgres-outer" ''
+      exec >$MINIFEDI_LOG/postgres.log 2>$MINIFEDI_LOG/postgres.log
+
       exec ${pkgs.s6}/bin/s6-notifyoncheck ${
         pkgs.writeShellScript "run-postgres-inner" ''
           export PATH=${pkgs.gettext}/bin:$PATH

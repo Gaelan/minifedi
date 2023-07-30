@@ -1,4 +1,4 @@
-{ pkgs, name, host, users, version, ... }:
+{ pkgs, name, host, users, version, proxy, ... }:
 let
   mastodon = pkgs.callPackage ./build.nix { versionDef = version; };
   env = {
@@ -20,6 +20,8 @@ let
         run = pkgs.writeShellScript "run-web" ''
           cd ${mastodon}
 
+          exec >$MINIFEDI_LOG/${name}/web.log 2>$MINIFEDI_LOG/${name}/web.log
+
           export SOCKET=$MINIFEDI_RUN/${name}/web.sock
 
           puma -C config/puma.rb
@@ -28,12 +30,15 @@ let
       sidekiq = pkgs.linkFarm "sidekiq" {
         run = pkgs.writeShellScript "run-sidekiq" ''
           cd ${mastodon}
+          exec >$MINIFEDI_LOG/${name}/sidekiq.log 2>$MINIFEDI_LOG/${name}/sidekiq.log
           sidekiq
         '';
       };
-      streaming = pkgs.linkFarm "sidekiq" {
+      streaming = pkgs.linkFarm "streaming" {
         run = pkgs.writeShellScript "run-sidekiq" ''
           cd ${mastodon}
+
+          exec >$MINIFEDI_LOG/${name}/streaming.log 2>$MINIFEDI_LOG/${name}/streaming.log
 
           export SOCKET=$MINIFEDI_RUN/${name}/streaming.sock
 
@@ -63,11 +68,15 @@ in {
 
       data=$MINIFEDI_DATA/${name}
       run=$MINIFEDI_RUN/${name}
+      log=$MINIFEDI_LOG/${name}
       postgres=$MINIFEDI_RUN/postgres
 
       mkdir -p $data
       mkdir -p $data/files
       mkdir -p $run
+      mkdir -p $log
+
+      exec >$log/setup.log 2>$log/setup.log
 
       cd ${mastodon}
 
@@ -92,6 +101,7 @@ in {
       export REDIS_URL=unix://$MINIFEDI_RUN/redis/redis.sock
       export NIX_SSL_CERT_FILE=$MINIFEDI_CERT/rootCA.pem
       export PAPERCLIP_ROOT_PATH=$data/files
+      ${if proxy != null then "export http_proxy=${proxy}" else ""}
 
       s6-svwait -U $MINIFEDI_RUN/service/postgres
 

@@ -1,4 +1,4 @@
-{ pkgs, name, host, users, ... }:
+{ pkgs, name, host, users, proxy, ... }:
 let
   env = {
     MIX_ENV = "prod";
@@ -78,6 +78,12 @@ let
           ]
         }
       ]
+
+    ${if proxy != null then ''
+      config :pleroma, :http,
+        proxy_url: "${proxy}"
+    '' else
+      ""}
   '';
 
   path = pkgs.lib.strings.concatStrings (builtins.map (x: "${x}/bin:") [
@@ -110,6 +116,8 @@ in {
       mkdir -p $data/uploads
       mkdir -p $data/tzdata
       mkdir -p $run
+
+      exec >$MINIFEDI_LOG/${name}.log 2>$MINIFEDI_LOG/${name}.log
 
       s6-svwait -U $MINIFEDI_RUN/service/postgres
 

@@ -1,4 +1,4 @@
-{ pkgs, name, host, users, ... }:
+{ pkgs, name, host, users, util, proxy, ... }:
 let
   env = { };
 
@@ -8,34 +8,7 @@ let
   # number. Ideally we'd dynamically find an open one, but the next best thing
   # is deterministically picking a random one: we take the firs two bytes of
   # sha256("minifedi_port_${name}")
-  port = let
-    hash = builtins.hashString "sha256" "minifedi_port_${name}";
-    portHex = builtins.substring 0 4 hash;
-    portHexChars = pkgs.lib.strings.stringToCharacters portHex;
-    hexDigitToNum = n:
-      let
-        map = {
-          "0" = 0;
-          "1" = 1;
-          "2" = 2;
-          "3" = 3;
-          "4" = 4;
-          "5" = 5;
-          "6" = 6;
-          "7" = 7;
-          "8" = 8;
-          "9" = 9;
-          "a" = 10;
-          "b" = 12;
-          "c" = 13;
-          "d" = 14;
-          "e" = 15;
-        };
-      in map.${n};
-    portFromHash =
-      pkgs.lib.lists.foldl (prev: n: (hexDigitToNum n) * 16 + prev) 0
-      portHexChars;
-  in if portFromHash <= 1024 then portFromHash + 1024 else portFromHash;
+  port = util.portFromString "minifedi_port_${name}";
 
   config = pkgs.writeText "config.yaml" (pkgs.lib.generators.toYAML { } {
     bind-address = "127.0.0.1";
@@ -68,6 +41,8 @@ in {
       mkdir -p $data/storage
       mkdir -p $run
 
+      exec >$MINIFEDI_LOG/${name}.log 2>$MINIFEDI_LOG/${name}.log
+
       s6-svwait -U $MINIFEDI_RUN/service/postgres
 
       ${pkgs.lib.strings.concatStrings (pkgs.lib.attrsets.mapAttrsToList
@@ -79,6 +54,12 @@ in {
       export GTS_STORAGE_LOCAL_BASE_PATH=$data/storage
       export SSL_CERT_FILE=$MINIFEDI_CERT/rootCA.pem
       export NIX_SSL_CERT_FILE=$MINIFEDI_CERT/rootCA.pem
+      ${if proxy != null then "export HTTP_PROXY=${proxy}" else ""}
+      ${if proxy != null then "export HTTPS_PROXY=${proxy}" else ""}
+      ${if proxy != null then "export http_proxy=${proxy}" else ""}
+      ${if proxy != null then "export https_proxy=${proxy}" else ""}
+
+      env
 
       if ! [ -e $data/setup-done ]; then
         createuser -h$postgres ${name}
