@@ -8,7 +8,7 @@
 | ---------- | ------------------- | ------------------ | ------------------------------- | --------------- | -------------- | --------------------- | ------------------- | ------------------ | ----- |
 | Mastodon   | Ruby + JS (yarn1)   | Postgres + Redis   | Elasticsearch                   | Yes             | Yes            | Yes (Nixpkgs OpenSSL) | Yes                 | CLI (no passwords) | Masto |
 | Akkoma     | Elixir + JS (yarn1) | Postgres           | RUM (pg extension), Mellisearch | Yes             | Yes            | Insecure only         | Yes                 | CLI                | Masto |
-| GoToSocial | Go + JS (yarn1)     | SQLite or Postgres | -                               | Yes             | No             | Yes (Nixpkgs go)      | Yes                 | Yes                | Masto |
+| GoToSocial | Go + JS (yarn1)     | SQLite or Postgres | -                               | Yes             | No             | Linux only            | Yes                 | Yes                | Masto |
 
 ## Not yet supported
 
@@ -23,7 +23,7 @@
 | Pixelfed           | PHP (Composer)              | MySQL or Postgres + Redis | -                 | Yes             | Yes (FastCGI)     | Probably (libcurl)                 | Yes (HTTP_PROXY)    | CLI                      | Masto          |
 | Takahe             | Python (pip)                | Postgres                  | -                 | Probably        | Probably (Django) | Yes                                | Yes (HTTP_PROXY)    | email or interactive CLI | Masto          |
 | Bookwyrm           | Python (pip)                | Postgres                  | -                 | Unclear         | Probably (Django) | Yes                                | Yes (HTTP_PROXY)    | CLI-web interactive      | -              |
-| honk               | Go                          | SQLite                    | -                 | SQLite only     | Yes               | Yes (Nixpkgs go)                   | Yes (HTTP_PROXY)    | CLI                      | honk           |
+| honk               | Go                          | SQLite                    | -                 | SQLite only     | Yes               | Linux only                         | Yes (HTTP_PROXY)    | CLI                      | honk           |
 | Friendica?         |
 | GNU Social?        |
 | Writefreely?       |
